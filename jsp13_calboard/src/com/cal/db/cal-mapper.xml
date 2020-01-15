@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.cal.mapper">
+
+	<resultMap type="CalDto" id="myResultMap">
+		<result property="seq" column="SEQ"/>
+		<result property="id" column="ID"/>
+		<result property="title" column="TITLE"/>
+		<result property="content" column="CONTENT"/>
+		<result property="mdate" column="MDATE"/>
+		<result property="regdate" column="REGDATE"/>
+	
+	
+	</resultMap>
+	
+	<insert id="insert" parameterType="CalDto">
+		INSERT INTO CALBOARD VALUES(CALBOARDSEQ.NEXTVAL, #{id}, #{title}, #{content}, #{mdate}, SYSDATE)
+	</insert>
+	
+	<select id="getCalList" resultType="CalDto">
+		SELECT SEQ, ID, TITLE, CONTENT, MDATE, REGDATE 
+		FROM CALBOARD WHERE ID=#{id} AND SUBSTR(MDATE,1,8)=#{mdate}
+	
+	</select>
+	
+	<select id="getCalViewList" resultType="CalDto">
+		SELECT SEQ, ID, TITLE, CONTENT, MDATE, REGDATE
+		FROM
+			(SELECT (ROW_NUMBER() OVER(PARTITION BY SUBSTR(MDATE,1,8) ORDER BY MDATE))RN,
+				SEQ, ID, TITLE, CONTENT, MDATE, REGDATE
+			FROM CALBOARD
+			WHERE ID=#{id} AND SUBSTR(MDATE,1,6)=#{mdate}
+			)
+		WHERE RN BETWEEN 1 AND 3
+		ORDER BY MDATE
+	
+	
+	</select>
+	
+	<select id="getCalViewCount" resultType="int" parameterType="CalDto">
+	
+		SELECT COUNT(*) FROM CALBOARD WHERE ID=#{id} AND SUBSTR(MDATE,1,8)=#{mdate}
+	
+	</select>
+	
+</mapper>
